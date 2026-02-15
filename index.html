@@ -9,8 +9,8 @@
         h2 { text-align: center; margin-bottom: 15px; }
         .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
         
-        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; }
-        .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -22,12 +22,11 @@
         .radio-group input { width: 20px; height: 20px; margin: 0; }
         .disabled { opacity: 0.3; pointer-events: none; background: #f9f9f9; }
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
         th { background: #f9f9fb; font-weight: 600; }
         .negative-red { color: #ff3b30; font-weight: 500; }
         
-        /* Updated Summary Box for Alignment */
         .summary { 
             font-size: 16px; 
             font-weight: 700; 
@@ -50,6 +49,7 @@
             <button class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
             <button class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
             <button class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
+            <button class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -88,6 +88,12 @@
                 <label>Pension Start Year (SMSF only)</label>
                 <input type="number" id="pensionYear" value="0" inputmode="numeric">
             </div>
+        </div>
+
+        <div id="tab4" class="tab-content">
+            <label>Annual Inflation Rate (%)</label>
+            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">* Adjusts ending balance AND grows withdrawal amounts annually.</p>
         </div>
     </div>
 
@@ -139,6 +145,7 @@
         const baseWith = parseFloat(document.getElementById("withdrawal").value) || 0;
         const withStart = parseInt(document.getElementById("withdrawYear").value) || 0;
         const penStart = parseInt(document.getElementById("pensionYear").value) || 0;
+        const inflationRate = (parseFloat(document.getElementById("inflation").value) || 0) / 100;
         const medicareChecked = document.querySelector('input[name="medicare"]:checked');
         const medicare = medicareChecked ? (medicareChecked.value === 'yes') : false;
 
@@ -148,7 +155,13 @@
 
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0;
-            let adjWith = (withStart === 0 || y >= withStart) ? baseWith : 0;
+            
+            // Calculate current year's withdrawal adjusted for inflation growth
+            // Withdrawal grows by inflation each year (starting after Year 1)
+            let inflationMultiplier = Math.pow(1 + inflationRate, y - 1);
+            let yearlyAdjustedWithdrawal = baseWith * inflationMultiplier;
+            
+            let adjWith = (withStart === 0 || y >= withStart) ? yearlyAdjustedWithdrawal : 0;
             
             for (let p = 1; p <= freq; p++) {
                 let take = Math.min(balance, adjWith);
@@ -157,19 +170,33 @@
                 balance += earned; yrInt += earned;
                 if (balance <= 0) { balance = 0; break; }
             }
+
             let tax = (regime === "SMSF") ? ((penStart > 0 && y >= penStart) ? 0 : yrInt * 0.15) : (regime === "Personal" ? personalTax(yrInt, medicare) : 0);
             balance -= tax; if (balance < 0) balance = 0;
             totalTaxPaid += tax;
-            tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td><b>${formatCurrency(balance)}</b></td></tr>`;
+
+            let endBalBeforeInflation = balance;
+            // Deflate ending balance to current value
+            balance = balance / (1 + inflationRate);
+
+            tableBody += `<tr>
+                <td>${y}</td>
+                <td>${formatCurrency(startBal)}</td>
+                <td><b>${formatCurrency(balance)}</b></td>
+                <td>${formatCurrency(yrInt)}</td>
+                <td>${formatCurrency(yrWith, true)}</td>
+                <td>${formatCurrency(tax)}</td>
+                <td>${formatCurrency(endBalBeforeInflation)}</td>
+            </tr>`;
+            
             if (balance <= 0) break;
         }
 
-        // Updated Summary Section Alignment
         document.getElementById("summaryBox").innerHTML = `
-            <span>Ending Balance: ${formatCurrency(balance)}</span>
+            <span>Ending Balance (Adj): ${formatCurrency(balance)}</span>
             <span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>
         `;
-        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
+        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
     }
 
     document.addEventListener("DOMContentLoaded", function() {

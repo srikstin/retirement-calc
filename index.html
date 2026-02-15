@@ -10,8 +10,34 @@
         .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
         
         .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
-        .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+        .tab-link { 
+            position: relative; 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: #8e8e93; 
+            border: none; 
+            background: none; 
+            border-bottom: 2px solid transparent; 
+            transition: 0.2s; 
+            white-space: nowrap; 
+        }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
+        
+        /* The Green Status Dot */
+        .indicator::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 7px;
+            height: 7px;
+            background-color: #34c759;
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
@@ -29,7 +55,6 @@
         .negative-red { color: #ff3b30; font-weight: 500; }
         
         .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; display: flex; justify-content: space-between; }
-        
         .audit-section { margin-top: 20px; border-top: 2px dashed #d1d1d6; padding-top: 20px; }
         .footer-link { text-align: center; margin-top: 30px; padding-bottom: 20px; }
         .footer-link a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
@@ -41,10 +66,10 @@
 
     <div class="card">
         <div class="tabs">
-            <button class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
-            <button class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
-            <button class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
-            <button class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
+            <button id="link-tab1" class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
+            <button id="link-tab2" class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
+            <button id="link-tab3" class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
+            <button id="link-tab4" class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -97,7 +122,7 @@
 
         <div class="audit-section">
             <label>Audit Year (Monthly Breakdown):</label>
-            <input type="number" id="auditYearInput" placeholder="Enter year (e.g. 5)" style="width: 200px;" oninput="calculate()">
+            <input type="number" id="auditYearInput" placeholder="Enter year" style="width: 200px;" oninput="calculate()">
             <div id="auditResultTable" class="table-wrap"></div>
         </div>
     </div>
@@ -137,17 +162,25 @@
 
     function calculate() {
         const regime = document.getElementById("regime").value;
+        const withdrawalVal = parseFloat(document.getElementById("withdrawal").value) || 0;
+        const inflationVal = parseFloat(document.getElementById("inflation").value) || 0;
+
+        // UI Updates for sections
         document.getElementById("medicareSection").className = (regime === "Personal") ? "" : "disabled";
         document.getElementById("pensionSection").className = (regime === "SMSF") ? "" : "disabled";
+
+        // Tab Indicator Logic - Only apply if NOT default
+        document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax");
+        document.getElementById("link-tab3").classList.toggle("indicator", withdrawalVal > 0);
+        document.getElementById("link-tab4").classList.toggle("indicator", inflationVal > 0);
 
         let balance = parseFloat(document.getElementById("principal").value) || 0;
         const mRate = (parseFloat(document.getElementById("monthlyRate").value) || 0) / 100;
         const years = parseInt(document.getElementById("years").value) || 0;
         const freq = parseInt(document.getElementById("frequency").value) || 1;
-        const baseWith = parseFloat(document.getElementById("withdrawal").value) || 0;
         const withStart = parseInt(document.getElementById("withdrawYear").value) || 0;
         const penStart = parseInt(document.getElementById("pensionYear").value) || 0;
-        const inflationRate = (parseFloat(document.getElementById("inflation").value) || 0) / 100;
+        const inflationRate = inflationVal / 100;
         const auditYear = parseInt(document.getElementById("auditYearInput").value) || 0;
         const medicare = document.querySelector('input[name="medicare"]:checked').value === 'yes';
 
@@ -157,7 +190,7 @@
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0;
             let infMult = Math.pow(1 + inflationRate, y - 1);
-            let monthlyWith = (withStart === 0 || y >= withStart) ? baseWith * infMult : 0;
+            let monthlyWith = (withStart === 0 || y >= withStart) ? withdrawalVal * infMult : 0;
             
             for (let p = 1; p <= freq; p++) {
                 let monthStart = balance;
@@ -165,7 +198,6 @@
                 balance -= take; 
                 let earned = balance * pRate;
                 balance += earned;
-                
                 yrWith += take; yrInt += earned;
 
                 if (y === auditYear) {
@@ -178,12 +210,12 @@
             balance -= tax; if (balance < 0) balance = 0;
             totalTaxPaid += tax;
 
-            let endNominal = balance + tax; // Nominal before tax deduction for column display
+            let endNominal = balance + tax;
             let inflationAdjEnd = balance / (1 + inflationRate);
 
             tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td><b>${formatCurrency(inflationAdjEnd)}</b></td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td>${formatCurrency(endNominal - tax)}</td></tr>`;
             
-            balance = inflationAdjEnd; // Carrying adjusted balance to next year
+            balance = inflationAdjEnd;
             if (balance <= 0) break;
         }
 

@@ -8,56 +8,27 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
         h2 { text-align: center; margin-bottom: 15px; }
         .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        
         .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
-        .tab-link { 
-            position: relative; 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            font-weight: 600; 
-            color: #8e8e93; 
-            border: none; 
-            background: none; 
-            border-bottom: 2px solid transparent; 
-            transition: 0.2s; 
-            white-space: nowrap; 
-        }
+        .tab-link { position: relative; padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
-        
-        /* The Green Status Dot */
-        .indicator::after {
-            content: '';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 7px;
-            height: 7px;
-            background-color: #34c759;
-            border-radius: 50%;
-            border: 1px solid white;
-        }
-
+        .indicator::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background-color: #34c759; border-radius: 50%; border: 1px solid white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         label { font-weight: 600; font-size: 14px; display: block; margin-top: 10px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border-radius: 10px; border: 1px solid #d1d1d6; box-sizing: border-box; }
         .radio-group { margin: 10px 0; display: flex; gap: 20px; }
         .radio-group label { font-weight: normal; margin: 0; display: flex; align-items: center; gap: 8px; }
         .radio-group input { width: 20px; height: 20px; margin: 0; }
         .disabled { opacity: 0.3; pointer-events: none; background: #f9f9f9; }
-        
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
         th { background: #f9f9fb; font-weight: 600; }
         .negative-red { color: #ff3b30; font-weight: 500; }
-        
         .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; display: flex; justify-content: space-between; }
         .audit-section { margin-top: 20px; border-top: 2px dashed #d1d1d6; padding-top: 20px; }
-        .footer-link { text-align: center; margin-top: 30px; padding-bottom: 20px; }
-        .footer-link a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 12px; color: #8e8e93; }
+        .footer a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -127,8 +98,9 @@
         </div>
     </div>
 
-    <div class="footer-link">
-        <a href="logic.html" target="_blank">How this calculator works</a>
+    <div class="footer">
+        <a href="logic.html" target="_blank">How this calculator works</a><br><br>
+        Version 1.0
     </div>
 
 <script>
@@ -165,11 +137,9 @@
         const withdrawalVal = parseFloat(document.getElementById("withdrawal").value) || 0;
         const inflationVal = parseFloat(document.getElementById("inflation").value) || 0;
 
-        // UI Updates for sections
         document.getElementById("medicareSection").className = (regime === "Personal") ? "" : "disabled";
         document.getElementById("pensionSection").className = (regime === "SMSF") ? "" : "disabled";
 
-        // Tab Indicator Logic - Only apply if NOT default
         document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax");
         document.getElementById("link-tab3").classList.toggle("indicator", withdrawalVal > 0);
         document.getElementById("link-tab4").classList.toggle("indicator", inflationVal > 0);
@@ -182,7 +152,8 @@
         const penStart = parseInt(document.getElementById("pensionYear").value) || 0;
         const inflationRate = inflationVal / 100;
         const auditYear = parseInt(document.getElementById("auditYearInput").value) || 0;
-        const medicare = document.querySelector('input[name="medicare"]:checked').value === 'yes';
+        const medicareChecked = document.querySelector('input[name="medicare"]:checked');
+        const medicare = medicareChecked ? (medicareChecked.value === 'yes') : false;
 
         const pRate = mRate * (12 / freq);
         let tableBody = "", auditBody = "", totalTaxPaid = 0;

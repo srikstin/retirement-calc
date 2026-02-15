@@ -9,8 +9,8 @@
         h2 { text-align: center; margin-bottom: 15px; }
         .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
         
-        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; }
-        .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
+        .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -21,24 +21,18 @@
         .radio-group label { font-weight: normal; margin: 0; display: flex; align-items: center; gap: 8px; }
         .radio-group input { width: 20px; height: 20px; margin: 0; }
         .disabled { opacity: 0.3; pointer-events: none; background: #f9f9f9; }
+        
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
         th { background: #f9f9fb; font-weight: 600; }
         .negative-red { color: #ff3b30; font-weight: 500; }
         
-        /* Updated Summary Box for Alignment */
-        .summary { 
-            font-size: 16px; 
-            font-weight: 700; 
-            margin-bottom: 15px; 
-            padding: 15px; 
-            background: #007aff; 
-            color: white; 
-            border-radius: 10px; 
-            display: flex; 
-            justify-content: space-between; 
-        }
+        .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; display: flex; justify-content: space-between; }
+        
+        .audit-section { margin-top: 20px; border-top: 2px dashed #d1d1d6; padding-top: 20px; }
+        .footer-link { text-align: center; margin-top: 30px; padding-bottom: 20px; }
+        .footer-link a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -50,6 +44,7 @@
             <button class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
             <button class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
             <button class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
+            <button class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -89,11 +84,26 @@
                 <input type="number" id="pensionYear" value="0" inputmode="numeric">
             </div>
         </div>
+
+        <div id="tab4" class="tab-content">
+            <label>Annual Inflation Rate (%)</label>
+            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
+        </div>
     </div>
 
-    <div class="card table-wrap" id="resultContainer">
+    <div class="card table-wrap">
         <div id="summaryBox" class="summary"></div>
         <div id="resultTable"></div>
+
+        <div class="audit-section">
+            <label>Audit Year (Monthly Breakdown):</label>
+            <input type="number" id="auditYearInput" placeholder="Enter year (e.g. 5)" style="width: 200px;" oninput="calculate()">
+            <div id="auditResultTable" class="table-wrap"></div>
+        </div>
+    </div>
+
+    <div class="footer-link">
+        <a href="logic.html" target="_blank">How this calculator works</a>
     </div>
 
 <script>
@@ -121,9 +131,7 @@
     function formatCurrency(val, isNegativeStyle) {
         const rounded = Math.round(val);
         const formatted = rounded.toLocaleString('en-AU');
-        if (isNegativeStyle && val > 0) {
-            return `<span class="negative-red">($${formatted})</span>`;
-        }
+        if (isNegativeStyle && val > 0) { return `<span class="negative-red">($${formatted})</span>`; }
         return `$${formatted}`;
     }
 
@@ -139,45 +147,59 @@
         const baseWith = parseFloat(document.getElementById("withdrawal").value) || 0;
         const withStart = parseInt(document.getElementById("withdrawYear").value) || 0;
         const penStart = parseInt(document.getElementById("pensionYear").value) || 0;
-        const medicareChecked = document.querySelector('input[name="medicare"]:checked');
-        const medicare = medicareChecked ? (medicareChecked.value === 'yes') : false;
+        const inflationRate = (parseFloat(document.getElementById("inflation").value) || 0) / 100;
+        const auditYear = parseInt(document.getElementById("auditYearInput").value) || 0;
+        const medicare = document.querySelector('input[name="medicare"]:checked').value === 'yes';
 
         const pRate = mRate * (12 / freq);
-        let tableBody = "";
-        let totalTaxPaid = 0;
+        let tableBody = "", auditBody = "", totalTaxPaid = 0;
 
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0;
-            let adjWith = (withStart === 0 || y >= withStart) ? baseWith : 0;
+            let infMult = Math.pow(1 + inflationRate, y - 1);
+            let monthlyWith = (withStart === 0 || y >= withStart) ? baseWith * infMult : 0;
             
             for (let p = 1; p <= freq; p++) {
-                let take = Math.min(balance, adjWith);
-                balance -= take; yrWith += take;
+                let monthStart = balance;
+                let take = Math.min(balance, monthlyWith);
+                balance -= take; 
                 let earned = balance * pRate;
-                balance += earned; yrInt += earned;
+                balance += earned;
+                
+                yrWith += take; yrInt += earned;
+
+                if (y === auditYear) {
+                    auditBody += `<tr><td>Mth ${p}</td><td>${formatCurrency(monthStart)}</td><td>${formatCurrency(take, true)}</td><td>${formatCurrency(earned)}</td><td>${formatCurrency(balance)}</td></tr>`;
+                }
                 if (balance <= 0) { balance = 0; break; }
             }
+
             let tax = (regime === "SMSF") ? ((penStart > 0 && y >= penStart) ? 0 : yrInt * 0.15) : (regime === "Personal" ? personalTax(yrInt, medicare) : 0);
             balance -= tax; if (balance < 0) balance = 0;
             totalTaxPaid += tax;
-            tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td><b>${formatCurrency(balance)}</b></td></tr>`;
+
+            let endNominal = balance + tax; // Nominal before tax deduction for column display
+            let inflationAdjEnd = balance / (1 + inflationRate);
+
+            tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td><b>${formatCurrency(inflationAdjEnd)}</b></td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td>${formatCurrency(endNominal - tax)}</td></tr>`;
+            
+            balance = inflationAdjEnd; // Carrying adjusted balance to next year
             if (balance <= 0) break;
         }
 
-        // Updated Summary Section Alignment
-        document.getElementById("summaryBox").innerHTML = `
-            <span>Ending Balance: ${formatCurrency(balance)}</span>
-            <span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>
-        `;
-        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
+        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance: ${formatCurrency(balance)}</span><span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>`;
+        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
+        
+        if (auditYear > 0) {
+            document.getElementById("auditResultTable").innerHTML = `<table><thead><tr><th>Period</th><th>Start</th><th>Withdr</th><th>Interest</th><th>End</th></tr></thead><tbody>${auditBody}</tbody></table>`;
+        } else {
+            document.getElementById("auditResultTable").innerHTML = "";
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(el => { 
-            el.addEventListener('input', calculate); 
-            el.addEventListener('change', calculate); 
-        });
+        inputs.forEach(el => { el.addEventListener('input', calculate); el.addEventListener('change', calculate); });
         calculate();
     });
 </script>

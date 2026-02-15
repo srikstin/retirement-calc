@@ -9,7 +9,6 @@
         h2 { text-align: center; margin-bottom: 15px; }
         .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
         
-        /* Tabs Styling */
         .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; }
         .tab-link { padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
@@ -27,7 +26,19 @@
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
         th { background: #f9f9fb; font-weight: 600; }
         .negative-red { color: #ff3b30; font-weight: 500; }
-        .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; text-align: center; }
+        
+        /* Updated Summary Box for Alignment */
+        .summary { 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            background: #007aff; 
+            color: white; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+        }
     </style>
 </head>
 <body>
@@ -41,30 +52,24 @@
             <button class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
         </div>
 
-        <!-- Tab 1: Investment -->
         <div id="tab1" class="tab-content active">
             <label>Principal ($)</label>
             <input type="number" id="principal" value="100000" inputmode="decimal">
-            
             <label>Monthly Interest Rate (%)</label>
             <input type="number" id="monthlyRate" value="2" step="0.1" inputmode="decimal">
-            
             <label>Years</label>
             <input type="number" id="years" value="30" inputmode="numeric">
-            
             <label>Compounding Frequency (per year)</label>
             <input type="number" id="frequency" value="12" inputmode="numeric">
         </div>
 
-        <!-- Tab 2: Tax -->
         <div id="tab2" class="tab-content">
             <label>Tax Regime</label>
             <select id="regime">
                 <option value="Personal">Personal (Stage 3 + Medicare)</option>
-                <option value="SMSF" selected>SMSF (15%)</option>
-                <option value="NoTax">No Tax</option>
+                <option value="SMSF">SMSF (15%)</option>
+                <option value="NoTax" selected>No Tax</option>
             </select>
-
             <div id="medicareSection">
                 <label>Apply 2% Medicare Levy?</label>
                 <div class="radio-group">
@@ -74,13 +79,11 @@
             </div>
         </div>
 
-        <!-- Tab 3: Withdrawals -->
         <div id="tab3" class="tab-content">
             <label>Monthly Withdrawal ($)</label>
             <input type="number" id="withdrawal" value="0" inputmode="decimal">
             <label>Start Withdrawals (Year)</label>
             <input type="number" id="withdrawYear" value="0" inputmode="numeric">
-            
             <div id="pensionSection">
                 <label>Pension Start Year (SMSF only)</label>
                 <input type="number" id="pensionYear" value="0" inputmode="numeric">
@@ -94,17 +97,12 @@
     </div>
 
 <script>
-    // Tab Switching Logic
     function openTab(evt, tabName) {
         let i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
-        }
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
         tablinks = document.getElementsByClassName("tab-link");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
         document.getElementById(tabName).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
@@ -150,7 +148,6 @@
 
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0;
-            // Adjustment: If withdrawal year is 0, start immediately from Year 1
             let adjWith = (withStart === 0 || y >= withStart) ? baseWith : 0;
             
             for (let p = 1; p <= freq; p++) {
@@ -166,13 +163,21 @@
             tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td><b>${formatCurrency(balance)}</b></td></tr>`;
             if (balance <= 0) break;
         }
-        document.getElementById("summaryBox").innerHTML = `Final: ${formatCurrency(balance)} | Total Tax: ${formatCurrency(totalTaxPaid)}`;
+
+        // Updated Summary Section Alignment
+        document.getElementById("summaryBox").innerHTML = `
+            <span>Ending Balance: ${formatCurrency(balance)}</span>
+            <span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>
+        `;
         document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(el => { el.addEventListener('input', calculate); el.addEventListener('change', calculate); });
+        inputs.forEach(el => { 
+            el.addEventListener('input', calculate); 
+            el.addEventListener('change', calculate); 
+        });
         calculate();
     });
 </script>

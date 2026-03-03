@@ -1,36 +1,30 @@
-# Savings & Retirement Calculator AU (v1.0)
+# Savings & Retirement Calculator AU (v1.1)
 
-A mobile-responsive web application designed to project long-term financial growth within the Australian tax landscape. This tool accounts for compound interest, inflation-adjusted withdrawals, and various tax regimes including SMSF and Personal Stage 3 brackets.
+A high-precision, mobile-responsive web application designed for long-term financial projections within the Australian tax landscape. Version 1.1 focuses on mathematical accuracy across different compounding frequencies and a lightweight, table-first user interface.
 
 ## 🚀 Live Demo
-You can access the calculator here: [https://yourusername.github.io](https://yourusername.github.io)
+Access the production version here: [https://yourusername.github.io](https://yourusername.github.io)
 
-## 🛠 Features
-- **Monthly Compounding Engine:** Calculates interest and withdrawals on a monthly basis for higher precision.
-- **Inflation Adjustment:** 
-  - Deflates the ending balance to show "Today's Dollars" (Purchasing Power).
-  - Automatically grows withdrawal amounts annually to keep up with the cost of living.
-- **Australian Tax Integration:**
-  - **SMSF:** 15% concessional tax with a toggle for Pension Phase (0%).
-  - **Personal:** Current 2024-25 Stage 3 Tax Brackets with an optional 2% Medicare Levy.
-- **Audit Tool:** A built-in "Monthly Breakdown" feature to verify the math for any specific year.
-- **Mobile First Design:** Tabbed interface optimized for iOS and Android devices.
+## 🛠 v1.1 Engineering Updates
+- **Frequency-Adjusted Withdrawals:** Fixed logic to ensure the annual withdrawal total is correct regardless of compounding frequency (e.g., Annual, Quarterly, Monthly).
+- **Lightweight Build:** Removed external Chart.js dependencies to guarantee 100% rendering reliability on older iOS devices and Microsoft Edge.
+- **Audit Precision:** Enhanced the "Monthly/Periodic Breakdown" tool to show exact cash flow per compounding period.
 
-## 📈 Calculation Logic
-The engine follows a strict order of operations each month:
-1. **Withdrawal First:** Funds are removed at the start of the period.
-2. **Interest Second:** Interest is calculated on the *remaining* balance.
-3. **Annual Tax:** Tax is settled at the end of each 12-month cycle.
-4. **Deflation:** The final annual balance is adjusted by the inflation rate before starting the next year.
+## 📈 Core Calculation Logic
+The engine follows a strict "Withdrawal-First" protocol:
+1. **Periodic Deduction:** The annual withdrawal target is divided by the `Compounding Frequency` and deducted at the start of each period.
+2. **Periodic Interest:** Interest is calculated on the remaining balance using the rate: `Monthly Rate × (12 / Frequency)`.
+3. **Annual Tax:** Tax is settled once per year based on total interest earned.
+4. **Purchasing Power:** The nominal year-end balance is deflated by the `Inflation Rate` to provide a "Today's Dollars" valuation.
 
 ## 📁 Repository Structure
-- `index.html`: The main application (HTML5, CSS3, Vanilla JavaScript).
-- `logic.html`: Detailed documentation of the mathematical formulas and sequence.
-- `README.md`: Project overview and setup instructions.
+- `index.html`: The main calculator (Tabbed UI, Vanilla JS).
+- `logic.html`: Technical documentation of formulas and order of operations.
+- `README.md`: Project overview and version history.
 
 ## 📝 Version History
-- **v1.0 (Current):** Official release with tabbed UI, green status indicators, and inflation-linked withdrawal growth.
-- **v0.5-Beta:** Initial testing of Stage 3 tax logic and monthly compounding.
+- **v1.1 (Current):** Standardised withdrawal logic for all frequencies; removed charting library for stability.
+- **v1.0:** Official release with tabbed UI, Stage 3 Tax Brackets, and Inflation logic.
 
-## ⚖️ License
-This project is for educational and illustrative purposes only. It does not constitute financial advice.
+## ⚖️ Disclaimer
+This tool is for illustrative purposes only and does not constitute financial advice. All tax calculations are based on 2024-25 Australian Treasury standards.

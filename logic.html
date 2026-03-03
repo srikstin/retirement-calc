@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculation Logic - Version 1.0</title>
+    <title>Calculation Logic - Version 1.1</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f2f2f7; color: #1c1c1e; line-height: 1.6; }
         .card { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); max-width: 800px; margin: 0 auto; }
@@ -13,39 +13,33 @@
         li { margin-bottom: 12px; }
         code { background: #f2f2f7; padding: 2px 5px; border-radius: 4px; font-weight: bold; }
         .back-link { display: inline-block; margin-top: 20px; color: #007aff; text-decoration: none; font-weight: 600; }
-        .version-badge { background: #007aff; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; vertical-align: middle; margin-left: 10px; }
+        .version-badge { background: #34c759; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; vertical-align: middle; margin-left: 10px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>How the Calculator Works <span class="version-badge">Version 1.0</span></h2>
-        <p>This calculator uses a <strong>monthly compounding engine</strong> to project savings and retirement balances over time, accounting for tax, inflation, and withdrawals.</p>
+        <h2>How the Calculator Works <span class="version-badge">Version 1.1</span></h2>
+        <p>This calculator uses a <strong>periodic compounding engine</strong> to project savings and retirement balances, accounting for tax, inflation, and frequency-adjusted withdrawals.</p>
 
         <h3>The Annual Calculation Sequence</h3>
         <ul>
-            <li><strong>1. Opening Balance:</strong> The year begins with the <code>Start</code> balance. For Year 1, this is your Principal. For subsequent years, it is the <strong>Inflation Adjusted End</strong> balance from the year prior.</li>
+            <li><strong>1. Opening Balance:</strong> Each year starts with the <code>Start</code> balance. For Year 1, this is the Principal. For later years, it is the <strong>Inflation Adjusted End</strong> balance from the previous year.</li>
             
-            <li><strong>2. Withdrawal Growth:</strong> If withdrawals are active, the monthly amount is increased annually to account for inflation. 
-                <br><em>Formula:</em> <code>Base Withdrawal × (1 + Inflation Rate) ^ (Year - 1)</code>.
-                <br><strong>Note:</strong> This growth is applied from the first year to maintain consistent purchasing power, even if the start year for withdrawals is set in the future.</li>
+            <li><strong>2. Withdrawal Growth:</strong> Monthly withdrawals are increased annually by the inflation rate: 
+                <br><code>Annual Total = (Monthly Withdrawal × 12) × (1 + Inflation Rate) ^ (Year - 1)</code>.</li>
             
-            <li><strong>3. Monthly Compounding Loop (12 Times):</strong> Within each month:
+            <li><strong>3. Compounding Loop (Frequency based):</strong> The year is split into periods based on <code>Compounding Frequency</code> (e.g., 4 for Quarterly, 12 for Monthly):
                 <ul>
-                    <li><strong>Withdrawal First:</strong> The monthly withdrawal is deducted from the balance <em>before</em> interest is calculated.</li>
-                    <li><strong>Interest Second:</strong> The remaining balance earns interest based on the <code>Monthly Rate</code>.</li>
+                    <li><strong>Frequency-Adjusted Withdrawal:</strong> The Annual Total is divided by the Frequency. This amount is deducted <em>before</em> interest is calculated for that period.</li>
+                    <li><strong>Periodic Interest:</strong> The <code>Monthly Rate</code> is converted to a periodic rate: <code>Monthly Rate × (12 / Frequency)</code>.</li>
                 </ul>
             </li>
 
-            <li><strong>4. Tax Settlement:</strong> At the end of month 12, the <strong>Total Annual Interest</strong> is calculated.
-                <ul>
-                    <li><strong>SMSF:</strong> A flat 15% tax is applied (unless the Pension Phase year has been reached).</li>
-                    <li><strong>Personal:</strong> Interest is processed through the 2024-25 Stage 3 Tax Brackets (+ optional 2% Medicare Levy).</li>
-                </ul>
-            </li>
+            <li><strong>4. Tax Settlement:</strong> At the end of the final period of the year, total annual interest is taxed. SMSF is a flat 15%; Personal uses 2024-25 Stage 3 Brackets (+ optional 2% Medicare).</li>
 
-            <li><strong>5. Inflation Deflation:</strong> Finally, the nominal balance is "deflated" to show today's purchasing power. 
-                <br><em>Formula:</em> <code>End Balance / (1 + Inflation Rate)</code>. This adjusted figure becomes the starting point for the next year.</li>
+            <li><strong>5. Inflation Deflation:</strong> The nominal end-of-year balance is deflated to show today's purchasing power: 
+                <br><code>End Balance / (1 + Inflation Rate)</code>.</li>
         </ul>
 
         <a href="index.html" class="back-link">← Back to Calculator</a>

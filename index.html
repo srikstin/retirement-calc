@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savings Calculator</title>
+    <title>Savings Calculator v1.1</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
         h2 { text-align: center; margin-bottom: 15px; }
@@ -94,7 +94,7 @@
         <div id="resultTable"></div>
 
         <div class="audit-section">
-            <label>Audit Year (Monthly Breakdown):</label>
+            <label>Audit Year (Breakdown by Period):</label>
             <input type="number" id="auditYearInput" placeholder="Enter year" style="width: 200px;" oninput="calculate()">
             <div id="auditResultTable" class="table-wrap"></div>
         </div>
@@ -102,7 +102,7 @@
 
     <div class="footer">
         <a href="logic.html" target="_blank">How this calculator works</a><br><br>
-        Version 1.0
+        Version 1.1
     </div>
 
 <script>
@@ -154,8 +154,7 @@
         const penStart = parseInt(document.getElementById("pensionYear").value) || 0;
         const inflationRate = inflationVal / 100;
         const auditYear = parseInt(document.getElementById("auditYearInput").value) || 0;
-        const medicareChecked = document.querySelector('input[name="medicare"]:checked');
-        const medicare = medicareChecked ? (medicareChecked.value === 'yes') : false;
+        const medicare = document.querySelector('input[name="medicare"]:checked').value === 'yes';
 
         const pRate = mRate * (12 / freq);
         let tableBody = "", auditBody = "", totalTaxPaid = 0;
@@ -163,18 +162,21 @@
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0;
             let infMult = Math.pow(1 + inflationRate, y - 1);
-            let monthlyWith = (withStart === 0 || y >= withStart) ? withdrawalVal * infMult : 0;
+            
+            // Logic Fix: Scale withdrawal based on frequency
+            let annualWithTarget = (withdrawalVal * 12) * infMult;
+            let withPerPeriod = (withStart === 0 || y >= withStart) ? (annualWithTarget / freq) : 0;
             
             for (let p = 1; p <= freq; p++) {
-                let monthStart = balance;
-                let take = Math.min(balance, monthlyWith);
+                let periodStart = balance;
+                let take = Math.min(balance, withPerPeriod);
                 balance -= take; 
                 let earned = balance * pRate;
                 balance += earned;
                 yrWith += take; yrInt += earned;
 
                 if (y === auditYear) {
-                    auditBody += `<tr><td>Mth ${p}</td><td>${formatCurrency(monthStart)}</td><td>${formatCurrency(take, true)}</td><td>${formatCurrency(earned)}</td><td>${formatCurrency(balance)}</td></tr>`;
+                    auditBody += `<tr><td>Period ${p}</td><td>${formatCurrency(periodStart)}</td><td>${formatCurrency(take, true)}</td><td>${formatCurrency(earned)}</td><td>${formatCurrency(balance)}</td></tr>`;
                 }
                 if (balance <= 0) { balance = 0; break; }
             }
@@ -192,7 +194,7 @@
             if (balance <= 0) break;
         }
 
-        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance: ${formatCurrency(balance)}</span><span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>`;
+        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCurrency(balance)}</span><span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>`;
         document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
         
         if (auditYear > 0) {
@@ -210,5 +212,3 @@
 </script>
 </body>
 </html>
-
-

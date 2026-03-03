@@ -1,30 +1,27 @@
-# Savings & Retirement Calculator AU (v1.1)
+# Savings & Retirement Calculator AU (v1.2)
 
-A high-precision, mobile-responsive web application designed for long-term financial projections within the Australian tax landscape. Version 1.1 focuses on mathematical accuracy across different compounding frequencies and a lightweight, table-first user interface.
+A high-precision, mobile-responsive web application for financial projections within the Australian tax landscape. Version 1.2 adds a flat Company Tax regime and continues the lightweight, table-driven interface.
 
 ## 🚀 Live Demo
-Access the production version here: [https://yourusername.github.io](https://yourusername.github.io)
+Production version: [https://yourusername.github.io](https://yourusername.github.io)
 
-## 🛠 v1.1 Engineering Updates
-- **Frequency-Adjusted Withdrawals:** Fixed logic to ensure the annual withdrawal total is correct regardless of compounding frequency (e.g., Annual, Quarterly, Monthly).
-- **Lightweight Build:** Removed external Chart.js dependencies to guarantee 100% rendering reliability on older iOS devices and Microsoft Edge.
-- **Audit Precision:** Enhanced the "Monthly/Periodic Breakdown" tool to show exact cash flow per compounding period.
+## 🛠 v1.2 Engineering Updates
+- **Company Tax Regime:** Added a flat 25% tax option on annual interest earnings.
+- **Improved UI Feedback:** Refined green status indicators for the Tax tab to include Company and SMSF selections.
+- **Audit Stability:** Standardised the periodic audit tool for easier math verification.
 
 ## 📈 Core Calculation Logic
-The engine follows a strict "Withdrawal-First" protocol:
-1. **Periodic Deduction:** The annual withdrawal target is divided by the `Compounding Frequency` and deducted at the start of each period.
-2. **Periodic Interest:** Interest is calculated on the remaining balance using the rate: `Monthly Rate × (12 / Frequency)`.
-3. **Annual Tax:** Tax is settled once per year based on total interest earned.
-4. **Purchasing Power:** The nominal year-end balance is deflated by the `Inflation Rate` to provide a "Today's Dollars" valuation.
+1. **Periodic Deduction:** Annual withdrawal targets (grown by inflation) are divided by the frequency and deducted first.
+2. **Periodic Compounding:** Interest is calculated on the remaining balance each period.
+3. **Annual Tax Settlement:** Tax is settled once per year (15% SMSF, 25% Company, or Stage 3 Personal).
+4. **Purchasing Power:** Nominal balances are deflated by the inflation rate to show "Today's Dollars."
 
 ## 📁 Repository Structure
-- `index.html`: The main calculator (Tabbed UI, Vanilla JS).
-- `logic.html`: Technical documentation of formulas and order of operations.
-- `README.md`: Project overview and version history.
+- `index.html`: Main Calculator.
+- `logic.html`: Technical documentation.
+- `README.md`: Project overview and history.
 
 ## 📝 Version History
-- **v1.1 (Current):** Standardised withdrawal logic for all frequencies; removed charting library for stability.
-- **v1.0:** Official release with tabbed UI, Stage 3 Tax Brackets, and Inflation logic.
-
-## ⚖️ Disclaimer
-This tool is for illustrative purposes only and does not constitute financial advice. All tax calculations are based on 2024-25 Australian Treasury standards.
+- **v1.2 (Current):** Added Company Tax (25%).
+- **v1.1:** Fixed frequency-adjusted withdrawal logic; removed charting library for stability.
+- **v1.0:** Initial official release.

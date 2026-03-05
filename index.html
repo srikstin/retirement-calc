@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Savings Calculator v1.2</title>
+    <title>Savings Calculator v1.3</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
         h2 { text-align: center; margin-bottom: 15px; }
@@ -54,6 +54,10 @@
             <input type="number" id="years" value="30" inputmode="numeric">
             <label>Compounding Frequency (per year)</label>
             <input type="number" id="frequency" value="12" inputmode="numeric">
+            <label>Monthly Contribution ($)</label>
+            <input type="number" id="monthlyContribution" value="0" inputmode="decimal">
+            <label>Stop Contributing at Year (0 = never)</label>
+            <input type="number" id="stopContribYear" value="0" inputmode="numeric">
         </div>
 
         <div id="tab2" class="tab-content">
@@ -104,7 +108,7 @@
 
     <div class="footer">
         <a href="logic.html" target="_blank">How this calculator works</a><br><br>
-        Version 1.2
+        Version 1.3
     </div>
 
 <script>
@@ -144,6 +148,8 @@
         document.getElementById("medicareSection").className = (regime === "Personal") ? "" : "disabled";
         document.getElementById("pensionSection").className = (regime === "SMSF") ? "" : "disabled";
 
+        const monthlyContribVal = parseFloat(document.getElementById("monthlyContribution").value) || 0;
+        document.getElementById("link-tab1").classList.toggle("indicator", monthlyContribVal > 0);
         document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax");
         document.getElementById("link-tab3").classList.toggle("indicator", withdrawalVal > 0);
         document.getElementById("link-tab4").classList.toggle("indicator", inflationVal > 0);
@@ -157,26 +163,32 @@
         const inflationRate = inflationVal / 100;
         const auditYear = parseInt(document.getElementById("auditYearInput").value) || 0;
         const medicare = document.querySelector('input[name="medicare"]:checked').value === 'yes';
+        const monthlyContrib = parseFloat(document.getElementById("monthlyContribution").value) || 0;
+        const stopContribYear = parseInt(document.getElementById("stopContribYear").value) || 0;
+        const contribPerPeriod = monthlyContrib * 12 / freq;
 
         const pRate = mRate * (12 / freq);
         let tableBody = "", auditBody = "", totalTaxPaid = 0;
 
         for (let y = 1; y <= years; y++) {
-            let startBal = balance, yrInt = 0, yrWith = 0;
+            let startBal = balance, yrInt = 0, yrWith = 0, yrContrib = 0;
             let infMult = Math.pow(1 + inflationRate, y - 1);
             let annualWithTarget = (withdrawalVal * 12) * infMult;
             let withPerPeriod = (withStart === 0 || y >= withStart) ? (annualWithTarget / freq) : 0;
-            
+            let periodContrib = (stopContribYear === 0 || y <= stopContribYear) ? contribPerPeriod : 0;
+
             for (let p = 1; p <= freq; p++) {
                 let periodStart = balance;
+                balance += periodContrib;
+                yrContrib += periodContrib;
                 let take = Math.min(balance, withPerPeriod);
-                balance -= take; 
+                balance -= take;
                 let earned = balance * pRate;
                 balance += earned;
                 yrWith += take; yrInt += earned;
 
                 if (y === auditYear) {
-                    auditBody += `<tr><td>Period ${p}</td><td>${formatCurrency(periodStart)}</td><td>${formatCurrency(take, true)}</td><td>${formatCurrency(earned)}</td><td>${formatCurrency(balance)}</td></tr>`;
+                    auditBody += `<tr><td>Period ${p}</td><td>${formatCurrency(periodStart)}</td><td>${formatCurrency(periodContrib)}</td><td>${formatCurrency(take, true)}</td><td>${formatCurrency(earned)}</td><td>${formatCurrency(balance)}</td></tr>`;
                 }
                 if (balance <= 0) { balance = 0; break; }
             }
@@ -196,17 +208,17 @@
             let endNominal = balance + tax;
             let inflationAdjEnd = balance / (1 + inflationRate);
 
-            tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td><b>${formatCurrency(inflationAdjEnd)}</b></td><td>${formatCurrency(yrInt)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td>${formatCurrency(endNominal - tax)}</td></tr>`;
+            tableBody += `<tr><td>${y}</td><td>${formatCurrency(startBal)}</td><td><b>${formatCurrency(inflationAdjEnd)}</b></td><td>${formatCurrency(yrInt)}</td><td>${yrContrib > 0 ? `<span style="color:#34c759">+${Math.round(yrContrib).toLocaleString('en-AU')}</span>` : formatCurrency(0)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td>${formatCurrency(endNominal - tax)}</td></tr>`;
             
             balance = inflationAdjEnd;
             if (balance <= 0) break;
         }
 
         document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCurrency(balance)}</span><span>Total Tax: ${formatCurrency(totalTaxPaid)}</span>`;
-        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
+        document.getElementById("resultTable").innerHTML = `<table><thead><tr><th>Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Contrib</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
         
         if (auditYear > 0) {
-            document.getElementById("auditResultTable").innerHTML = `<table><thead><tr><th>Period</th><th>Start</th><th>Withdr</th><th>Interest</th><th>End</th></tr></thead><tbody>${auditBody}</tbody></table>`;
+            document.getElementById("auditResultTable").innerHTML = `<table><thead><tr><th>Period</th><th>Start</th><th>Contrib</th><th>Withdr</th><th>Interest</th><th>End</th></tr></thead><tbody>${auditBody}</tbody></table>`;
         } else {
             document.getElementById("auditResultTable").innerHTML = "";
         }

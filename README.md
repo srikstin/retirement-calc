@@ -1,9 +1,16 @@
-# Savings & Retirement Calculator AU (v1.3)
+# Savings & Retirement Calculator AU (v1.4)
 
-A high-precision, mobile-responsive web application for financial projections within the Australian tax landscape. Version 1.3 adds recurring monthly contributions with an optional stop year.
+A high-precision, mobile-responsive web application for financial projections within the Australian tax landscape. Version 1.4 improves output presentation with compact summary formatting, colour-banded rows, sticky headers, a sticky Year column, and milestone row emphasis.
 
 ## 🚀 Live Demo
 Production version: [https://yourusername.github.io](https://yourusername.github.io)
+
+## 🛠 v1.4 Engineering Updates
+- **Compact Summary:** Ending Balance and Total Tax in the summary bar now display in abbreviated K/M format (e.g. $1.23M) for quick scanning.
+- **Row Colour-Banding:** Table rows are tinted green when the inflation-adjusted balance grew year-on-year, red when it declined.
+- **Sticky Headers:** The results table header row stays visible while scrolling vertically within the results panel.
+- **Sticky Year Column:** The Year column sticks to the left edge when scrolling horizontally on small screens.
+- **Milestone Rows:** Every 5th year (Yr 5, 10, 15…) is emphasised with a bolder top border for easy navigation.
 
 ## 🛠 v1.3 Engineering Updates
 - **Monthly Contributions:** Added a monthly contribution input to model DCA/accumulation phases.
@@ -25,7 +32,8 @@ Each period executes in this order:
 - `README.md`: Project overview and history.
 
 ## 📝 Version History
-- **v1.3 (Current):** Added monthly contributions with optional stop year.
+- **v1.4 (Current):** Output presentation improvements — compact summary (K/M), colour-banded rows, sticky headers, sticky Year column, milestone row markers.
+- **v1.3:** Added monthly contributions with optional stop year.
 - **v1.2:** Added Company Tax (25%).
 - **v1.1:** Fixed frequency-adjusted withdrawal logic; removed charting library for stability.
 - **v1.0:** Initial official release.

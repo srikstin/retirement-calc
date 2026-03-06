@@ -1,9 +1,14 @@
-# Savings & Retirement Calculator AU (v1.5)
+# Savings & Retirement Calculator AU (v1.6)
 
-A high-precision, mobile-responsive web application for financial projections within the Australian tax landscape. Version 1.5 simplifies the UI by merging the Tax and Inflation input controls into a single "Tax & Inflation" tab, reducing clutter especially on mobile.
+A high-precision, mobile-responsive web application for financial projections within the Australian tax landscape. Version 1.6 adds an interactive balance chart below the results table.
 
 ## 🚀 Live Demo
 Production version: [https://yourusername.github.io](https://yourusername.github.io)
+
+## 🛠 v1.6 Engineering Updates
+- **Balance Chart:** Added a Canvas-based line chart below the results table showing inflation-adjusted ending balance per year. No external libraries — pure Canvas 2D API. Redraws automatically on input changes and theme toggles. HiDPI/retina-aware via `devicePixelRatio`.
+- **Dark / Light Theme Toggle:** Added a moon/sun button in the page header to switch between dark and light themes, with the preference persisted in `localStorage`.
+- **Summary Tax Label:** The summary bar now shows "No tax" as plain text (no amount) when the No Tax regime is selected, and displays the full label + compact amount for all other regimes.
 
 ## 🛠 v1.5 Engineering Updates
 - **Merged Tax & Inflation Tab:** Combined the separate Tax and Inflation tabs into a single "Tax & Inflation" tab for a simpler, more compact UI — especially beneficial on mobile devices.
@@ -36,7 +41,8 @@ Each period executes in this order:
 - `README.md`: Project overview and history.
 
 ## 📝 Version History
-- **v1.5 (Current):** Merged Tax and Inflation tabs into a single "Tax & Inflation" tab for simplified mobile-friendly UI.
+- **v1.6 (Current):** Canvas balance chart, dark/light theme toggle, improved summary tax label.
+- **v1.5:** Merged Tax and Inflation tabs into a single "Tax & Inflation" tab for simplified mobile-friendly UI.
 - **v1.4:** Output presentation improvements — compact summary (K/M), colour-banded rows, sticky headers, sticky Year column, milestone row markers.
 - **v1.3:** Added monthly contributions with optional stop year.
 - **v1.2:** Added Company Tax (25%).

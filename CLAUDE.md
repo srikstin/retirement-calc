@@ -14,7 +14,7 @@ A zero-dependency, single-file HTML application for modelling Australian retirem
 
 ## How It Works
 
-The calculator has three input tabs (Investment, Tax & Inflation, Withdrawals) and produces an annual results table plus a per-period audit view.
+The calculator has three input tabs (Investment, Tax & Inflation, Withdrawals) and produces an annual results table, a Canvas-based balance chart, and a per-period audit view.
 
 Each year is calculated in this sequence:
 1. **Opening balance** — principal for year 1, previous year's inflation-adjusted balance thereafter
@@ -34,7 +34,7 @@ Each year is calculated in this sequence:
 
 ## Technology
 
-Vanilla HTML5, CSS3, and ES6+ JavaScript. Australian dollar formatting via `toLocaleString('en-AU')`. Mobile-optimised with `inputmode="decimal"` on numeric inputs.
+Vanilla HTML5, CSS3, and ES6+ JavaScript. Australian dollar formatting via `toLocaleString('en-AU')`. Mobile-optimised with `inputmode="decimal"` on numeric inputs. Chart rendered via Canvas 2D API (no external libraries). Dark/light theme toggle with `localStorage` persistence.
 
 ## Documentation Maintenance
 

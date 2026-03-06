@@ -247,7 +247,12 @@
             if (balance <= 0) break;
         }
 
-        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCompact(balance)}</span><span>Total Tax: ${formatCompact(totalTaxPaid)}</span>`;
+        const taxLabel = regime === "NoTax" ? "No tax" :
+                         regime === "SMSF" ? "Total SMSF Tax" :
+                         regime === "Company" ? "Total Company Tax" :
+                         "Total Personal Tax";
+        const taxSpan = regime === "NoTax" ? taxLabel : `${taxLabel}: ${formatCompact(totalTaxPaid)}`;
+        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCompact(balance)}</span><span>${taxSpan}</span>`;
         document.getElementById("resultTable").innerHTML = `<table><thead><tr><th class="year-col">Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Contrib</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
         
         if (auditYear > 0) {

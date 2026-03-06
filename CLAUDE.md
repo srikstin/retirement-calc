@@ -19,7 +19,7 @@ The calculator has four input tabs (Investment, Tax, Withdrawals, Inflation) and
 Each year is calculated in this sequence:
 1. **Opening balance** — principal for year 1, previous year's inflation-adjusted balance thereafter
 2. **Withdrawal growth** — monthly withdrawal indexed by inflation
-3. **Periodic compounding** — interest compounded at the selected frequency, withdrawals deducted each period
+3. **Periodic compounding** — each period: contribution added, withdrawal deducted, then interest earned on the remaining balance
 4. **Tax settlement** — annual interest taxed under the selected regime at year end
 5. **Inflation deflation** — balance expressed in today's dollars
 
@@ -35,3 +35,12 @@ Each year is calculated in this sequence:
 ## Technology
 
 Vanilla HTML5, CSS3, and ES6+ JavaScript. Australian dollar formatting via `toLocaleString('en-AU')`. Mobile-optimised with `inputmode="decimal"` on numeric inputs.
+
+## Documentation Maintenance
+
+After any meaningful change (new feature, calculation logic update, new input field, UI change), always update these files before finishing:
+
+1. **[logic.html](logic.html)** — update the calculation sequence and any formula descriptions to reflect the new behaviour; bump the version badge
+2. **[README.md](README.md)** — add a version entry under "Engineering Updates", update "Core Calculation Logic" if the per-period order changes, and bump the version in the heading and Version History
+3. **[CLAUDE.md](CLAUDE.md)** — keep "How It Works" in sync with the actual calculation sequence
+4. **[index.html](index.html)** — bump the `<title>` and footer version number to match

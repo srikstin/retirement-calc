@@ -14,7 +14,7 @@ A zero-dependency, single-file HTML application for modelling Australian retirem
 
 ## How It Works
 
-The calculator has four input tabs (Investment, Tax, Withdrawals, Inflation) and produces an annual results table plus a per-period audit view.
+The calculator has three input tabs (Investment, Tax & Inflation, Withdrawals) and produces an annual results table plus a per-period audit view.
 
 Each year is calculated in this sequence:
 1. **Opening balance** — principal for year 1, previous year's inflation-adjusted balance thereafter

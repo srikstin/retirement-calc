@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Savings Calculator v1.4</title>
+    <title>Savings Calculator v1.5</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
         h2 { text-align: center; margin-bottom: 15px; }
@@ -44,9 +44,8 @@
     <div class="card">
         <div class="tabs">
             <button id="link-tab1" class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
-            <button id="link-tab2" class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
+            <button id="link-tab2" class="tab-link" onclick="openTab(event, 'tab2')">Tax & Inflation</button>
             <button id="link-tab3" class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
-            <button id="link-tab4" class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -79,6 +78,9 @@
                     <label><input type="radio" name="medicare" value="yes"> Yes</label>
                 </div>
             </div>
+            <label>Annual Inflation Rate (%)</label>
+            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
+            <p class="note-text">* Adjusts ending balance AND grows withdrawal amounts annually to maintain purchasing power.</p>
         </div>
 
         <div id="tab3" class="tab-content">
@@ -92,11 +94,6 @@
             </div>
         </div>
 
-        <div id="tab4" class="tab-content">
-            <label>Annual Inflation Rate (%)</label>
-            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
-            <p class="note-text">* Adjusts ending balance AND grows withdrawal amounts annually to maintain purchasing power.</p>
-        </div>
     </div>
 
     <div class="card">
@@ -112,7 +109,7 @@
 
     <div class="footer">
         <a href="logic.html" target="_blank">How this calculator works</a><br><br>
-        Version 1.4
+        Version 1.5
     </div>
 
 <script>
@@ -161,9 +158,8 @@
 
         const monthlyContribVal = parseFloat(document.getElementById("monthlyContribution").value) || 0;
         document.getElementById("link-tab1").classList.toggle("indicator", monthlyContribVal > 0);
-        document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax");
+        document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax" || inflationVal > 0);
         document.getElementById("link-tab3").classList.toggle("indicator", withdrawalVal > 0);
-        document.getElementById("link-tab4").classList.toggle("indicator", inflationVal > 0);
 
         let balance = parseFloat(document.getElementById("principal").value) || 0;
         const mRate = (parseFloat(document.getElementById("monthlyRate").value) || 0) / 100;

@@ -4,49 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Savings Calculator v1.4</title>
+    <title>Savings Calculator v1.6</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
-        h2 { text-align: center; margin-bottom: 15px; }
-        .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
+        :root {
+            --bg: #f2f2f7; --text: #1c1c1e; --card-bg: #ffffff; --border: #d1d1d6;
+            --th-bg: #f9f9fb; --table-border: #f2f2f7; --year-col-bg: #ffffff;
+            --disabled-bg: #f9f9f9; --note-color: #666; --footer-color: #8e8e93;
+            --milestone-border: #c7c7cc; --audit-border: #d1d1d6;
+            --input-bg: #ffffff; --input-text: #1c1c1e;
+            --toggle-bg: #e5e5ea; --toggle-text: #1c1c1e;
+        }
+        body.dark {
+            --bg: #1c1c1e; --text: #f2f2f7; --card-bg: #2c2c2e; --border: #3a3a3c;
+            --th-bg: #3a3a3c; --table-border: #3a3a3c; --year-col-bg: #2c2c2e;
+            --disabled-bg: #3a3a3c; --note-color: #8e8e93; --footer-color: #636366;
+            --milestone-border: #48484a; --audit-border: #3a3a3c;
+            --input-bg: #1c1c1e; --input-text: #f2f2f7;
+            --toggle-bg: #3a3a3c; --toggle-text: #f2f2f7;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: var(--bg); color: var(--text); }
+        .page-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 15px; }
+        h2 { margin: 0; }
+        .theme-toggle { position: absolute; right: 0; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--toggle-bg); color: var(--toggle-text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s, transform 0.2s; }
+        .theme-toggle:hover { transform: scale(1.1); opacity: 0.85; }
+        .card { background: var(--card-bg); padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; gap: 5px; overflow-x: auto; }
         .tab-link { position: relative; padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
-        .indicator::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background-color: #34c759; border-radius: 50%; border: 1px solid white; }
+        .indicator::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background-color: #34c759; border-radius: 50%; border: 1px solid var(--card-bg); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         label { font-weight: 600; font-size: 14px; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border-radius: 10px; border: 1px solid #d1d1d6; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border-radius: 10px; border: 1px solid var(--border); box-sizing: border-box; background: var(--input-bg); color: var(--input-text); }
         .radio-group { margin: 10px 0; display: flex; gap: 20px; }
         .radio-group label { font-weight: normal; margin: 0; display: flex; align-items: center; gap: 8px; }
         .radio-group input { width: 20px; height: 20px; margin: 0; }
-        .disabled { opacity: 0.3; pointer-events: none; background: #f9f9f9; }
+        .disabled { opacity: 0.3; pointer-events: none; background: var(--disabled-bg); }
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
-        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
-        th { background: #f9f9fb; font-weight: 600; position: sticky; top: 0; z-index: 2; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid var(--table-border); }
+        th { background: var(--th-bg); color: var(--text); font-weight: 600; position: sticky; top: 0; z-index: 2; }
         th.year-col { position: sticky; left: 0; z-index: 3; }
-        td.year-col { position: sticky; left: 0; z-index: 1; background: white; }
-        .milestone td { border-bottom: 2px solid #c7c7cc; }
+        td.year-col { position: sticky; left: 0; z-index: 1; background: var(--year-col-bg); }
+        .milestone td { border-bottom: 2px solid var(--milestone-border); }
         .result-table-wrap { max-height: 65vh; overflow-y: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         .negative-red { color: #ff3b30; font-weight: 500; }
         .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; display: flex; justify-content: space-between; }
-        .audit-section { margin-top: 20px; border-top: 2px dashed #d1d1d6; padding-top: 20px; }
-        .footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 12px; color: #8e8e93; }
+        .audit-section { margin-top: 20px; border-top: 2px dashed var(--audit-border); padding-top: 20px; }
+        .footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 12px; color: var(--footer-color); }
         .footer a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
-        .note-text { font-size: 12px; color: #666; margin-top: 10px; line-height: 1.4; }
+        .note-text { font-size: 12px; color: var(--note-color); margin-top: 10px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <h2>Savings Calculator</h2>
+    <div class="page-header">
+        <h2>Savings Calculator</h2>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
 
     <div class="card">
         <div class="tabs">
             <button id="link-tab1" class="tab-link active" onclick="openTab(event, 'tab1')">Investment</button>
-            <button id="link-tab2" class="tab-link" onclick="openTab(event, 'tab2')">Tax</button>
+            <button id="link-tab2" class="tab-link" onclick="openTab(event, 'tab2')">Tax & Inflation</button>
             <button id="link-tab3" class="tab-link" onclick="openTab(event, 'tab3')">Withdrawals</button>
-            <button id="link-tab4" class="tab-link" onclick="openTab(event, 'tab4')">Inflation</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -79,6 +102,9 @@
                     <label><input type="radio" name="medicare" value="yes"> Yes</label>
                 </div>
             </div>
+            <label>Annual Inflation Rate (%)</label>
+            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
+            <p class="note-text">* Adjusts ending balance AND grows withdrawal amounts annually to maintain purchasing power.</p>
         </div>
 
         <div id="tab3" class="tab-content">
@@ -92,16 +118,13 @@
             </div>
         </div>
 
-        <div id="tab4" class="tab-content">
-            <label>Annual Inflation Rate (%)</label>
-            <input type="number" id="inflation" value="0" step="0.1" inputmode="decimal">
-            <p class="note-text">* Adjusts ending balance AND grows withdrawal amounts annually to maintain purchasing power.</p>
-        </div>
     </div>
 
     <div class="card">
         <div id="summaryBox" class="summary"></div>
         <div class="result-table-wrap"><div id="resultTable"></div></div>
+
+        <canvas id="balanceChart" style="width:100%;display:none;margin-top:16px;border-radius:10px;"></canvas>
 
         <div class="audit-section">
             <label>Audit Year (Breakdown by Period):</label>
@@ -112,7 +135,7 @@
 
     <div class="footer">
         <a href="logic.html" target="_blank">How this calculator works</a><br><br>
-        Version 1.4
+        Version 1.6
     </div>
 
 <script>
@@ -161,9 +184,8 @@
 
         const monthlyContribVal = parseFloat(document.getElementById("monthlyContribution").value) || 0;
         document.getElementById("link-tab1").classList.toggle("indicator", monthlyContribVal > 0);
-        document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax");
+        document.getElementById("link-tab2").classList.toggle("indicator", regime !== "NoTax" || inflationVal > 0);
         document.getElementById("link-tab3").classList.toggle("indicator", withdrawalVal > 0);
-        document.getElementById("link-tab4").classList.toggle("indicator", inflationVal > 0);
 
         let balance = parseFloat(document.getElementById("principal").value) || 0;
         const mRate = (parseFloat(document.getElementById("monthlyRate").value) || 0) / 100;
@@ -180,6 +202,7 @@
 
         const pRate = mRate * (12 / freq);
         let tableBody = "", auditBody = "", totalTaxPaid = 0, rowIdx = 0;
+        const chartData = [];
 
         for (let y = 1; y <= years; y++) {
             let startBal = balance, yrInt = 0, yrWith = 0, yrContrib = 0;
@@ -222,12 +245,17 @@
             rowIdx++;
             const trClass = rowIdx % 5 === 0 ? 'milestone' : '';
             tableBody += `<tr class="${trClass}"><td class="year-col">${y}</td><td>${formatCurrency(startBal)}</td><td><b>${formatCurrency(inflationAdjEnd)}</b></td><td>${formatCurrency(yrInt)}</td><td>${yrContrib > 0 ? `<span style="color:#34c759">+${Math.round(yrContrib).toLocaleString('en-AU')}</span>` : formatCurrency(0)}</td><td>${formatCurrency(yrWith, true)}</td><td>${formatCurrency(tax)}</td><td>${formatCurrency(endNominal - tax)}</td></tr>`;
-            
+            chartData.push({ year: y, balance: inflationAdjEnd });
             balance = inflationAdjEnd;
             if (balance <= 0) break;
         }
 
-        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCompact(balance)}</span><span>Total Tax: ${formatCompact(totalTaxPaid)}</span>`;
+        const taxLabel = regime === "NoTax" ? "No tax" :
+                         regime === "SMSF" ? "Total SMSF Tax" :
+                         regime === "Company" ? "Total Company Tax" :
+                         "Total Personal Tax";
+        const taxSpan = regime === "NoTax" ? taxLabel : `${taxLabel}: ${formatCompact(totalTaxPaid)}`;
+        document.getElementById("summaryBox").innerHTML = `<span>Ending Balance (Adj): ${formatCompact(balance)}</span><span>${taxSpan}</span>`;
         document.getElementById("resultTable").innerHTML = `<table><thead><tr><th class="year-col">Yr</th><th>Start</th><th>Inflation adj. End</th><th>Interest</th><th>Contrib</th><th>Withdr</th><th>Tax</th><th>End</th></tr></thead><tbody>${tableBody}</tbody></table>`;
         
         if (auditYear > 0) {
@@ -235,9 +263,107 @@
         } else {
             document.getElementById("auditResultTable").innerHTML = "";
         }
+
+        lastChartData = chartData;
+        drawChart(chartData);
+    }
+
+    let lastChartData = [];
+
+    function drawChart(data) {
+        const canvas = document.getElementById('balanceChart');
+        if (!data.length) { canvas.style.display = 'none'; return; }
+        canvas.style.display = 'block';
+
+        const dpr = window.devicePixelRatio || 1;
+        const W = canvas.clientWidth;
+        const H = 260;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const isDark = document.body.classList.contains('dark');
+        const textColor = isDark ? '#f2f2f7' : '#1c1c1e';
+        const gridColor = isDark ? '#3a3a3c' : '#e5e5ea';
+        const bgColor = isDark ? '#2c2c2e' : '#ffffff';
+
+        const pad = { top: 28, right: 20, bottom: 36, left: 72 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+
+        const maxBal = Math.max(...data.map(d => d.balance), 0);
+        const maxY = maxBal * 1.1 || 1;
+
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+
+        // Grid lines & Y labels
+        const gridLines = 5;
+        for (let i = 0; i <= gridLines; i++) {
+            const y = pad.top + chartH - (i / gridLines) * chartH;
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'right';
+            ctx.fillText(formatCompact(maxY * i / gridLines), pad.left - 5, y + 4);
+        }
+
+        // X axis labels
+        ctx.textAlign = 'center';
+        ctx.fillStyle = textColor;
+        const n = data.length;
+        const xStep = Math.ceil(n / 10);
+        data.forEach((d, i) => {
+            if (i % xStep === 0 || i === n - 1) {
+                const x = pad.left + (n > 1 ? i / (n - 1) : 0) * chartW;
+                ctx.fillText(d.year, x, H - pad.bottom + 16);
+            }
+        });
+
+        // Draw a line
+        function drawLine(color, getValue) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            data.forEach((d, i) => {
+                const x = pad.left + (n > 1 ? i / (n - 1) : 0) * chartW;
+                const y = pad.top + chartH - (getValue(d) / maxY) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        drawLine('#007aff', d => d.balance);
+
+        // Legend
+        ctx.strokeStyle = '#007aff';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(pad.left, pad.top - 10); ctx.lineTo(pad.left + 18, pad.top - 10); ctx.stroke();
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'left';
+        ctx.fillText('Inflation-adj. balance', pad.left + 22, pad.top - 6);
+    }
+
+    const ICON_MOON = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    const ICON_SUN = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark');
+        document.getElementById('themeToggle').innerHTML = isDark ? ICON_SUN : ICON_MOON;
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        drawChart(lastChartData);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').innerHTML = ICON_SUN;
+        }
         const inputs = document.querySelectorAll('input, select');
         inputs.forEach(el => { el.addEventListener('input', calculate); el.addEventListener('change', calculate); });
         calculate();

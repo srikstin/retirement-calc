@@ -6,40 +6,64 @@
     <link rel="apple-touch-icon" href="icon.png">
     <title>Savings Calculator v1.5</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: #f2f2f7; color: #1c1c1e; }
-        h2 { text-align: center; margin-bottom: 15px; }
-        .card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        .tabs { display: flex; border-bottom: 1px solid #d1d1d6; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
+        :root {
+            --bg: #f2f2f7; --text: #1c1c1e; --card-bg: #ffffff; --border: #d1d1d6;
+            --th-bg: #f9f9fb; --table-border: #f2f2f7; --year-col-bg: #ffffff;
+            --disabled-bg: #f9f9f9; --note-color: #666; --footer-color: #8e8e93;
+            --milestone-border: #c7c7cc; --audit-border: #d1d1d6;
+            --input-bg: #ffffff; --input-text: #1c1c1e;
+            --toggle-bg: #e5e5ea; --toggle-text: #1c1c1e;
+        }
+        body.dark {
+            --bg: #1c1c1e; --text: #f2f2f7; --card-bg: #2c2c2e; --border: #3a3a3c;
+            --th-bg: #3a3a3c; --table-border: #3a3a3c; --year-col-bg: #2c2c2e;
+            --disabled-bg: #3a3a3c; --note-color: #8e8e93; --footer-color: #636366;
+            --milestone-border: #48484a; --audit-border: #3a3a3c;
+            --input-bg: #1c1c1e; --input-text: #f2f2f7;
+            --toggle-bg: #3a3a3c; --toggle-text: #f2f2f7;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background: var(--bg); color: var(--text); }
+        .page-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 15px; }
+        h2 { margin: 0; }
+        .theme-toggle { position: absolute; right: 0; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--toggle-bg); color: var(--toggle-text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s, transform 0.2s; }
+        .theme-toggle:hover { transform: scale(1.1); opacity: 0.85; }
+        .card { background: var(--card-bg); padding: 16px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; gap: 5px; overflow-x: auto; }
         .tab-link { position: relative; padding: 10px 15px; cursor: pointer; font-size: 14px; font-weight: 600; color: #8e8e93; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .tab-link.active { color: #007aff; border-bottom: 2px solid #007aff; }
-        .indicator::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background-color: #34c759; border-radius: 50%; border: 1px solid white; }
+        .indicator::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background-color: #34c759; border-radius: 50%; border: 1px solid var(--card-bg); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         label { font-weight: 600; font-size: 14px; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border-radius: 10px; border: 1px solid #d1d1d6; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border-radius: 10px; border: 1px solid var(--border); box-sizing: border-box; background: var(--input-bg); color: var(--input-text); }
         .radio-group { margin: 10px 0; display: flex; gap: 20px; }
         .radio-group label { font-weight: normal; margin: 0; display: flex; align-items: center; gap: 8px; }
         .radio-group input { width: 20px; height: 20px; margin: 0; }
-        .disabled { opacity: 0.3; pointer-events: none; background: #f9f9f9; }
+        .disabled { opacity: 0.3; pointer-events: none; background: var(--disabled-bg); }
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
-        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #f2f2f7; }
-        th { background: #f9f9fb; font-weight: 600; position: sticky; top: 0; z-index: 2; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid var(--table-border); }
+        th { background: var(--th-bg); color: var(--text); font-weight: 600; position: sticky; top: 0; z-index: 2; }
         th.year-col { position: sticky; left: 0; z-index: 3; }
-        td.year-col { position: sticky; left: 0; z-index: 1; background: white; }
-        .milestone td { border-bottom: 2px solid #c7c7cc; }
+        td.year-col { position: sticky; left: 0; z-index: 1; background: var(--year-col-bg); }
+        .milestone td { border-bottom: 2px solid var(--milestone-border); }
         .result-table-wrap { max-height: 65vh; overflow-y: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         .negative-red { color: #ff3b30; font-weight: 500; }
         .summary { font-size: 16px; font-weight: 700; margin-bottom: 15px; padding: 15px; background: #007aff; color: white; border-radius: 10px; display: flex; justify-content: space-between; }
-        .audit-section { margin-top: 20px; border-top: 2px dashed #d1d1d6; padding-top: 20px; }
-        .footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 12px; color: #8e8e93; }
+        .audit-section { margin-top: 20px; border-top: 2px dashed var(--audit-border); padding-top: 20px; }
+        .footer { text-align: center; margin-top: 30px; padding-bottom: 20px; font-size: 12px; color: var(--footer-color); }
         .footer a { color: #007aff; text-decoration: none; font-weight: 600; font-size: 14px; }
-        .note-text { font-size: 12px; color: #666; margin-top: 10px; line-height: 1.4; }
+        .note-text { font-size: 12px; color: var(--note-color); margin-top: 10px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <h2>Savings Calculator</h2>
+    <div class="page-header">
+        <h2>Savings Calculator</h2>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
 
     <div class="card">
         <div class="tabs">
@@ -233,7 +257,20 @@
         }
     }
 
+    const ICON_MOON = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    const ICON_SUN = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark');
+        document.getElementById('themeToggle').innerHTML = isDark ? ICON_SUN : ICON_MOON;
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').innerHTML = ICON_SUN;
+        }
         const inputs = document.querySelectorAll('input, select');
         inputs.forEach(el => { el.addEventListener('input', calculate); el.addEventListener('change', calculate); });
         calculate();
